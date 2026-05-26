@@ -10,6 +10,22 @@ readme = "README.md"
 keywords = ["jpeg", "exif", "metadata", "stripper", "lossless"]
 categories = ["command-line-utilities", "multimedia::images"]
 
+[package.metadata.deb]
+name = "jpeg-exif-stripper"
+maintainer = "Raimo Geisel <raimog92@protonmail.com>"
+copyright = "2024, Raimo Geisel <raimog92@protonmail.com>"
+license-file = ["LICENSE.md", "0"]
+extended-description = """\
+A high-performance, modular, and completely lossless command-line utility \
+written in Rust to surgically remove EXIF metadata fields from JPEG images."""
+depends = "$auto"
+section = "utility"
+priority = "optional"
+assets = [
+    ["target/release/jpeg_exif_stripper", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/jpeg-exif-stripper/", "644"],
+]
+
 [dependencies]
 kamadak-exif = "0.6.1"
 img-parts = "0.4.0"
