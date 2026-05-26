@@ -37,6 +37,7 @@ SKIP_GITHUB=false
 SKIP_WINDOWS=false
 SKIP_APPIMAGE=false
 SKIP_AUR=false
+SKIP_DEB=false
 DRAFT_GITHUB=false
 
 while [[ $# -gt 0 ]]; do
@@ -65,6 +66,10 @@ while [[ $# -gt 0 ]]; do
             SKIP_APPIMAGE=true
             shift
             ;;
+        --skip-deb)
+            SKIP_DEB=true
+            shift
+            ;;
         --skip-aur)
             SKIP_AUR=true
             shift
@@ -85,6 +90,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --skip-github        Skip GitHub release creation"
             echo "  --skip-windows       Skip Windows cross-compilation"
             echo "  --skip-appimage      Skip AppImage building"
+            echo "  --skip-deb           Skip .deb package building"
             echo "  --skip-aur           Skip AUR deployment"
             echo "  --draft-github       Create GitHub release as draft"
             echo "  -h, --help           Show this help"
@@ -167,6 +173,7 @@ step_github_release() {
     args=()
     [ "$SKIP_WINDOWS" = true ]  && args+=(--skip-windows)
     [ "$SKIP_APPIMAGE" = true ] && args+=(--skip-appimage)
+    [ "$SKIP_DEB" = true ]      && args+=(--skip-deb)
     [ "$DRAFT_GITHUB" = true ]  && args+=(--draft)
 
     if [ "$EXECUTE" = true ]; then
@@ -214,7 +221,7 @@ print_plan() {
     echo ""
     [ "$SKIP_TESTS" = false ]   && echo "    1. cargo test"                            || echo "    1. [skip] cargo test"
     [ "$SKIP_CRATES" = false ]  && echo "    2. cargo publish (crates.io)"             || echo "    2. [skip] crates.io"
-    [ "$SKIP_GITHUB" = false ]  && echo "    3. GitHub release (tarball + AppImage + Windows zip)" || echo "    3. [skip] GitHub release"
+    [ "$SKIP_GITHUB" = false ]  && echo "    3. GitHub release (tarball + AppImage + .deb + Windows zip)" || echo "    3. [skip] GitHub release"
     [ "$SKIP_AUR" = false ]     && echo "    4. AUR deploy (jpeg-exif-stripper, jpeg-exif-stripper-git, jpeg-exif-stripper-bin)" || echo "    4. [skip] AUR"
     echo ""
     if [ "$EXECUTE" = false ]; then

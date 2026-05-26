@@ -31,6 +31,7 @@ DRAFT_MODE=false
 SKIP_BUILD=false
 SKIP_WINDOWS=false
 SKIP_APPIMAGE=false
+SKIP_DEB=false
 RELEASE_NOTES=""
 
 while [[ $# -gt 0 ]]; do
@@ -51,6 +52,10 @@ while [[ $# -gt 0 ]]; do
             SKIP_APPIMAGE=true
             shift
             ;;
+        --skip-deb)
+            SKIP_DEB=true
+            shift
+            ;;
         --notes)
             RELEASE_NOTES="$2"
             shift 2
@@ -65,6 +70,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --skip-build         Skip the cargo build step"
             echo "  --skip-windows       Skip Windows cross-compile"
             echo "  --skip-appimage      Skip AppImage build"
+            echo "  --skip-deb           Skip .deb package build"
             echo "  --notes TEXT         Release notes text"
             echo "  -h, --help           Show this help"
             exit 0
@@ -211,6 +217,32 @@ build_appimage() {
     fi
 }
 
+build_deb() {
+    if ! cargo deb --help &>/dev/null 2>&1; then
+        log_warning "cargo-deb not installed — skipping .deb build"
+        log_warning "Install with: cargo install cargo-deb"
+        return 0
+    fi
+
+    cd "$PROJECT_ROOT"
+    log_step "Building .deb package (cargo-deb)..."
+    # Binary is already built; pass --no-build to avoid recompiling.
+    cargo deb --no-build
+
+    local deb_src
+    deb_src=$(find "${PROJECT_ROOT}/target/debian" -maxdepth 1 -name '*.deb' 2>/dev/null \
+        | sort -V | tail -n1)
+
+    if [ -z "$deb_src" ]; then
+        log_warning ".deb not found in target/debian/ — skipping"
+        return 0
+    fi
+
+    local deb_dest="${DIST_DIR}/$(basename "$deb_src")"
+    cp "$deb_src" "$deb_dest"
+    log_success "Built: $(basename "$deb_dest") ($(du -sh "$deb_dest" | cut -f1))"
+}
+
 create_github_release() {
     local tag="v$VERSION"
     local title="jpeg_exif_stripper v${VERSION}"
@@ -224,7 +256,8 @@ create_github_release() {
     for f in \
         "${DIST_DIR}/${PACKAGE_NAME}-${VERSION}-x86_64.tar.gz" \
         "${DIST_DIR}/${PACKAGE_NAME}-${VERSION}-x86_64.AppImage" \
-        "${DIST_DIR}/${PACKAGE_NAME}-${VERSION}-x86_64-windows.zip"; do
+        "${DIST_DIR}/${PACKAGE_NAME}-${VERSION}-x86_64-windows.zip" \
+        "${DIST_DIR}/jpeg-exif-stripper_${VERSION}_amd64.deb"; do
         if [ -f "$f" ]; then
             assets+=("$f")
             log_info "  + $(basename "$f")"
@@ -281,6 +314,11 @@ main() {
 
     if [ "$SKIP_APPIMAGE" = false ]; then
         build_appimage
+        echo ""
+    fi
+
+    if [ "$SKIP_DEB" = false ]; then
+        build_deb
         echo ""
     fi
 
