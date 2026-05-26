@@ -1,0 +1,23 @@
+# Maintainer: Raimo Geisel <raimog92@protonmail.com>
+pkgname=jpeg-exif-stripper-bin
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="A high-performance, lossless JPEG EXIF metadata removal utility (prebuilt binary)"
+arch=('x86_64')
+url="https://github.com/Pommersche92/jpeg_exif_stripper"
+license=('GPL-3.0-only')
+provides=('jpeg-exif-stripper')
+conflicts=('jpeg-exif-stripper' 'jpeg-exif-stripper-git')
+source=("https://github.com/Pommersche92/jpeg_exif_stripper/releases/download/v$pkgver/jpeg_exif_stripper-$pkgver-x86_64.tar.gz")
+sha256sums=('PLACEHOLDER')
+
+package() {
+    cd "jpeg_exif_stripper-$pkgver"
+    install -Dm755 jpeg_exif_stripper "$pkgdir/usr/bin/jpeg_exif_stripper"
+    if [ -f LICENSE.md ]; then
+        install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"
+    fi
+    if [ -f README.md ]; then
+        install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    fi
+}
