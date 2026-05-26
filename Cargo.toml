@@ -1,0 +1,23 @@
+[package]
+name = "jpeg_exif_stripper"
+version = "0.1.0"
+edition = "2021"
+authors = ["Raimo Geisel <raimo@geisel-web.de>"]
+license = "GPL-3.0-only"
+description = "A high-performance, lossless JPEG EXIF metadata removal utility."
+repository = "https://github.com/pommersche92/jpeg_exif_stripper"
+readme = "README.md"
+keywords = ["jpeg", "exif", "metadata", "stripper", "lossless"]
+categories = ["command-line-utilities", "multimedia::images"]
+
+[dependencies]
+kamadak-exif = "0.6.1"
+img-parts = "0.4.0"
+
+# --- Release Build Profiles Optimization Matrix ---
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
